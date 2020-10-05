@@ -5,62 +5,60 @@ trigger:
 resources:
 - repo: self
 
-echo ls -R $(System.ArtifactsDirectory)
+variables:
+  tag: 25 
+  #'$(Build.BuildId)'
 
-# variables:
-#   tag: 25 
-#   #'$(Build.BuildId)'
-
-# stages:
-# - stage: Build
-#   displayName: Build image
-#   jobs:  
-#   - job: Build
-#     displayName: Build
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
-#     # - task: Docker@2
-#     #   inputs:
-#     #     containerRegistry: 'myactgaurav-docker-hub'
-#     #     repository: 'myactgaurav/currency-exchange-devops'
-#     #     command: 'buildAndPush'
-#     #     Dockerfile: '**/Dockerfile'
-#     #     tags: '$(tag)'
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    # - task: Docker@2
+    #   inputs:
+    #     containerRegistry: 'myactgaurav-docker-hub'
+    #     repository: 'myactgaurav/currency-exchange-devops'
+    #     command: 'buildAndPush'
+    #     Dockerfile: '**/Dockerfile'
+    #     tags: '$(tag)'
     
-#     - task: CopyFiles@2
-#       inputs:
-#         SourceFolder: '$(System.DefaultWorkingDirectory)'
-#         Contents: '**'
-#         TargetFolder: '$(Build.ArtifactStagingDirectory)'
-#     - task: PublishBuildArtifacts@1
-#       inputs:
-#         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-#         ArtifactName: 'manifests'
-#         publishLocation: 'Container'
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'manifests'
+        publishLocation: 'Container'
 
-# #Stage 2 - configure and deploy 
+#Stage 2 - configure and deploy 
 
-# - stage: Deploy
-#   displayName: Deploy image
-#   jobs:  
-#   - job: Deploy
-#     displayName: Deploy
-#     pool:
-#       vmImage: 'ubuntu-latest'
-#     steps:
+- stage: Deploy
+  displayName: Deploy image
+  jobs:  
+  - job: Deploy
+    displayName: Deploy
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
 
-#     - task: DownloadPipelineArtifact@2
-#       inputs:
-#         buildType: 'current'
-#         artifactName: 'manifests'
-#         itemPattern: '**/*.yaml'
-#         targetPath: '$(System.ArtifactsDirectory)'
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'manifests'
+        itemPattern: '**/*.yaml'
+        targetPath: '$(System.ArtifactsDirectory)'
 
-#     - task: KubernetesManifest@0
-#       inputs:
-#         action: 'deploy'
-#         kubernetesServiceConnection: 'azure-kubernetes-connection'
-#         namespace: 'default'
-#         manifests: '$(System.ArtifactsDirectory)/deployment.yaml'
-#         containers: 'myactgaurav/currency-exchange-devops:$(tag)'
+    - task: KubernetesManifest@0
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'azure-kubernetes-connection'
+        namespace: 'default'
+        manifests: '$(System.ArtifactsDirectory)/deployment.yaml'
+        containers: 'myactgaurav/currency-exchange-devops:$(tag)'
